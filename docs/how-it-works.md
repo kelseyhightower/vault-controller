@@ -60,7 +60,7 @@ All tokens are generated with the following token configuration:
 }
 ```
 
-### Pushing the wrapped token to Pod
+### Pushing the wrapped token to the Pod
 
 Once the wrapped token is created the Vault Controller pushes the token to the Pod using the Pod IP extracted from the Pod details obtained earlier:
 
