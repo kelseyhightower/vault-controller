@@ -2,20 +2,33 @@
 
 This tutorial will walk you through deploying the following components:
 
-* Vault Example 0.0.1
+* Vault Example ReplicaSet
 
-The `vault-example` Pod utilizes the `vault-init` container to request a wrapped token from the Vault Controller. The `vault-init` container performs the following actions during the Pod initialization phase:
+The `vault-example` ReplicaSet will create Pods composed from the following container images: 
+
+* `kelseyhightower/vault-init` - A container that requests and unwraps tokens from a Vault Controller
+* `kelseyhightower/vault-example` - A container that uses and renews Vault tokens
+
+The `vault-init` container performs the following actions during the Pod initialization phase:
 
 * Requests a wrapped token from the Vault Controller
 * Unwraps the token by communicating with a Vault server
 * Writes the unwrapped token to a shared volume at `/var/run/secrets/vaultproject.io/secret.json`
 * Exits so the Pod creation process can continue
 
+The `vault-example` container performs the following actions while the Pod is running:
+
+* Reads a token from a shared volume at `/var/run/secrets/vaultproject.io/secret.json`
+* Logs the token details (Don't do this in production)
+* Renews the token with a Vault server
+
 ## Deploy the Vault Example application
 
 ```
 kubectl -n vault-controller create -f replicasets/vault-example.yaml
 ```
+
+### Observe the `vault-init` container
 
 Once a `vault-example` Pod is scheduled to a node the `vault-init` container will run during the Pod initialization phase:
 
@@ -48,6 +61,8 @@ Log output:
 2016/10/28 19:08:33 wrote /var/run/secrets/vaultproject.io/secret.json
 2016/10/28 19:08:33 Successfully obtained and unwrapped the vault token, exiting...
 ```
+
+### Observe the `vault-example` container
 
 At this point the init process has completed and the `vault-example` Pod should be running:
 
