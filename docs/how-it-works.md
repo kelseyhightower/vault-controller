@@ -4,7 +4,7 @@
 ## Requesting a Wrapped Token
 
 The Vault Controller creates [wrapped tokens](https://www.hashicorp.com/blog/vault-0.6.html#response-wrapping) for each Pod based
-on a simple callback flow. Pods request a wrapped token via an HTTP request to a running Vault Controller running in the Kubernetes cluster:
+on a simple callback flow. Pods request a wrapped token via an HTTP request to a Vault Controller running in the Kubernetes cluster:
 
 ```
 http://vault-controller/token?name=vault-example-bx1r8&namespace=default
