@@ -17,5 +17,31 @@ This is a prototype. Do not use this in production.
 
 ## Usage
 
+The following tutorials will guide you through the deployment of the `vault-controller` and an example application to see how it all works.
+
+### Perquisites
+
+Clone this repository:
+
+```
+git clone https://github.com/kelseyhightower/vault-controller.git
+```
+
+```
+cd vault-controller
+```
+
+Before you can complete the tutorials you'll need access to a Kubernetes clusters. [Google Container Engine (GKE)](https://cloud.google.com/container-engine/) or [minikube](https://github.com/kubernetes/minikube) should work.
+
+### Tutorials
+
 * [Deployment Guide](docs/deployment-guide.md)
 * [Example Usage](docs/example-usage.md)
+
+## Cleanup
+
+Once you are done with the tutorials run the following command to clean up:
+
+```
+kubectl delete namespace vault-controller
+```
