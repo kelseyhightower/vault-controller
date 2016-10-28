@@ -35,7 +35,7 @@ At this point the Vault server will be accessible to other Pods in the `vault-co
 http://vault:8200
 ```
 
-To streamline this tutorial the root key has been set to:
+To streamline this tutorial the Vault root key has been set to:
 
 ```
 3e4a5ba1-kube-422b-d1db-844979cab098
@@ -45,7 +45,7 @@ To streamline this tutorial the root key has been set to:
 
 ### Create the vault-controller Secret
 
-Create the `vault-controller` and store the Vault root key. This will allow the Vault Controller to authenticate with the Vault server and generate tokens for Pods. Only the Vault Controller should have access to the root key.
+Store the Vault root key in a Kubernetes secret. This will allow the Vault Controller to reference the Vault root key at deployment time, authenticate with the Vault server, and generate tokens for Pods. Only the Vault Controller should have access to the root key.
 
 ```
 kubectl -n vault-controller \
