@@ -47,11 +47,11 @@ All tokens are generated with the following token configuration:
 &api.TokenCreateRequest{
   Policies: strings.Split(policies, ","),
   Metadata: map[string]string{
-	"host_ip":    pod.Status.HostIP,
+	"host_ip":   pod.Status.HostIP,
     "namespace": pod.Metadata.Namespace,
-	"pod_ip":     pod.Status.PodIP,
-	"pod_name":   pod.Metadata.Name,
-	"pod_uid":    pod.Metadata.Uid,
+	"pod_ip":    pod.Status.PodIP,
+	"pod_name":  pod.Metadata.Name,
+	"pod_uid":   pod.Metadata.Uid,
   },
   DisplayName: pod.Metadata.Name,
   Period:      ttl,
