@@ -56,7 +56,7 @@ kubectl -n vault-controller \
 ### Deploy the Vault Controller:
 
 ```
-kubectl -n create vault-controller -f replicasets/vault-controller.yaml 
+kubectl -n vault-controller create -f replicasets/vault-controller.yaml 
 ```
 
 ### Create the vault-controller service
