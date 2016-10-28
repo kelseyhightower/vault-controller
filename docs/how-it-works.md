@@ -83,4 +83,4 @@ If the Pod is able to successfully unwrap the token it MUST respond HTTP 200. Fu
 
 ### Renewing the Token
 
-After the token has been unwrapped it's the responsibility of the Pod to renew it against vault directly. No future calls to the Vault Controller are required.
+After the token has been unwrapped it's the responsibility of the Pod to renew the token against a Vault server. No future calls to the Vault Controller are required.
