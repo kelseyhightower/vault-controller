@@ -29,7 +29,7 @@ vaultproject.io/ttl
 
 These annotations are trusted. If a Kubernetes object is created with those annotations we assume the request to create the object was authenticated and represents the desired state of the administrator.
 
-The `vaultproject.io/policies` annotation is required and must hold a comma separated list of vault policies to attach to the token:
+The `vaultproject.io/policies` annotation is required and must hold a comma separated list of Vault policies to attach to the token:
 
 ```
 vaultproject.io/policies: "default,web"
