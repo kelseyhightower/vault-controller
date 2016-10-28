@@ -8,7 +8,7 @@ This is a prototype. Do not use this in production.
 
 ## Use Case
 
-* Each Pod requires a dedicated Vault token tied its life-cycle
+* Each Pod requires a dedicated Vault token tied to the Pod's life-cycle
 * Each Pod will use a dedicated Vault token to request secrets from a Vault server
 
 ## Documentation
