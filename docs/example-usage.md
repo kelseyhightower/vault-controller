@@ -108,3 +108,28 @@ to get more info about the token.
 ==> vault-example started! Log data will stream in below:
 2016/10/28 19:08:35 Successfully renewed the client token; next renewal in 43200 seconds
 ```
+
+You've reached the end of the Vault Controller tutorial. At this point you can experiment by scaling up the `vault-example` replicaset and observing how each Pod obtains a dedicated Vault token.
+
+Scale the `vault-exampl` ReplicaSet:
+
+```
+kubectl -n vault-controller \
+  scale replicaset vault-example --replicas=3
+```
+
+Review the logs for one of the `vault-example` Pods:
+
+```
+kubectl -n vault-controller logs \
+  $(kubectl -n vault-controller get pods \
+    -l app=vault-example \
+    -o jsonpath='{.items[1].metadata.name}') \
+  -c vault-example
+```
+
+Once you have completed the tutorial be sure to clean up:
+
+```
+kubectl delete namespace vault-controller
+```
