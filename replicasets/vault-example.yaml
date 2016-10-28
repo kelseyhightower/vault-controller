@@ -31,7 +31,7 @@ spec:
               },
               { 
                 "name": "VAULT_CONTROLLER_ADDR",
-                "value": "http://vault-controller:80"
+                "value": "http://vault-controller"
               }
             ],
             "volumeMounts": [
@@ -47,6 +47,9 @@ spec:
         - name: vault-example
           image: "kelseyhightower/vault-example:0.0.1"
           imagePullPolicy: Always
+          env:
+            - name: "VAULT_ADDR"
+              value: "http://vault:8200"
           volumeMounts:
             - name: vault-token
               mountPath: "/var/run/secrets/vaultproject.io"
