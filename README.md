@@ -19,7 +19,7 @@ This is a prototype. Do not use this in production.
 
 The following tutorials will guide you through the deployment of the `vault-controller` and an example application to see how it all works.
 
-### Perquisites
+### Prerequisites
 
 Clone this repository:
 
