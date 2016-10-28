@@ -18,7 +18,7 @@ kubectl create namespace vault-controller
 The following command will create a Vault 0.6.2 server running in [dev mode](https://www.vaultproject.io/intro/getting-started/dev-server.html). This configuration should not be used in production or exposed to the outside world.
 
 ```
-kubectl create -n vault-controller -f replicasets/vault.yaml
+kubectl -n vault-controller create -f replicasets/vault.yaml
 ```
 
 ### Create the vault service
@@ -26,7 +26,7 @@ kubectl create -n vault-controller -f replicasets/vault.yaml
 Expose the Vault server internally to the cluster:
 
 ```
-kubectl create -n vault-controller -f services/vault.yaml
+kubectl -n vault-controller create -f services/vault.yaml
 ```
 
 At this point the Vault server will be accessible to other Pods in the `vault-controller` namespace at the following address:
@@ -48,15 +48,15 @@ To streamline this tutorial the root key has been set to:
 Create the `vault-controller` and store the Vault root key. This will allow the Vault Controller to authenticate with the Vault server and generate tokens for Pods. Only the Vault Controller should have access to the root key.
 
 ```
-kubectl create secret generic vault-controller \
-  -n vault-controller \
+kubectl -n vault-controller \
+  create secret generic vault-controller \
   --from-literal "vault_token=3e4a5ba1-kube-422b-d1db-844979cab098"
 ```
 
 ### Deploy the Vault Controller:
 
 ```
-kubectl create -n vault-controller -f replicasets/vault-controller.yaml 
+kubectl -n create vault-controller -f replicasets/vault-controller.yaml 
 ```
 
 ### Create the vault-controller service
@@ -64,7 +64,7 @@ kubectl create -n vault-controller -f replicasets/vault-controller.yaml
 Expose the Vault Controller internally to the cluster:
 
 ```
-kubectl create -n vault-controller -f services/vault-controller.yaml
+kubectl -n vault-controller create -f services/vault-controller.yaml
 ```
 
 At this point the Vault Controller will be accessible to other Pods in the `vault-controller` namespace at the following address:
@@ -75,4 +75,4 @@ http://vault-controller
 
 ## Next Steps
 
-A vault server and vault-controller are not running in the `vault-controller` namespace. Now it's time to deploy a Pod that can request tokens from the vault-controller.
+A vault server and vault-controller are not running in the `vault-controller` namespace. Now it's time to [deploy a Pod that can request tokens from the vault-controller](example-usage.md).
