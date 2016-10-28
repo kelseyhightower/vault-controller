@@ -75,4 +75,4 @@ http://vault-controller
 
 ## Next Steps
 
-A vault server and vault-controller are not running in the `vault-controller` namespace. Now it's time to [deploy a Pod that can request tokens from the vault-controller](example-usage.md).
+A Vault server and Vault Controller are now running in the `vault-controller` namespace. Now it's time to [deploy a Pod that can request tokens from the vault-controller](example-usage.md).
