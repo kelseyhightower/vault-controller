@@ -24,7 +24,7 @@ kubectl -n vault-controller get pods -l app=vault-example
 ```
 ```
 NAME                  READY     STATUS     RESTARTS   AGE
-vault-example-f0cip   0/1       Init:0/1   0          1s
+vault-example-wif7l   0/1       Init:0/1   0          6s
 ```
 
 View the logs for the `vault-init` container:
@@ -40,12 +40,13 @@ kubectl -n vault-controller logs \
 Log output:
 
 ```
-2016/10/28 18:27:34 Starting vault-init...
-2016/10/28 18:27:34 Requesting a new wrapped token from http://vault-controller:80
-2016/10/28 18:27:34 token request: Request error error missing or empty pod IP; retrying in 5s
-2016/10/28 18:27:39 Requesting a new wrapped token from http://vault-controller:80
-2016/10/28 18:27:39 Token request complete; waiting for callback...
-2016/10/28 18:27:39 Successfully obtained and unwrapped the vault token, exiting...
+2016/10/28 19:08:28 Starting vault-init...
+2016/10/28 19:08:28 Requesting a new wrapped token from http://vault-controller
+2016/10/28 19:08:28 token request: Request error error missing or empty pod IP; retrying in 5s
+2016/10/28 19:08:33 Requesting a new wrapped token from http://vault-controller
+2016/10/28 19:08:33 Token request complete; waiting for callback...
+2016/10/28 19:08:33 wrote /var/run/secrets/vaultproject.io/secret.json
+2016/10/28 19:08:33 Successfully obtained and unwrapped the vault token, exiting...
 ```
 
 At this point the init process has completed and the `vault-example` Pod should be running:
@@ -55,7 +56,7 @@ kubectl -n vault-controller get pods -l app=vault-example
 ```
 ```
 NAME                  READY     STATUS    RESTARTS   AGE
-vault-example-f0cip   1/1       Running   0          2m
+vault-example-wif7l   1/1       Running   0          1m
 ```
 
 View the logs for the `vault-example` container:
@@ -71,8 +72,8 @@ kubectl -n vault-controller logs \
 Log output:
 
 ```
-2016/10/28 18:27:41 Starting vault-example app...
-2016/10/28 18:27:41 Reading vault secret file from /var/run/secrets/vaultproject.io/secret.json
+2016/10/28 19:08:35 Starting vault-example app...
+2016/10/28 19:08:35 Reading vault secret file from /var/run/secrets/vaultproject.io/secret.json
 ==> WARNING: Don't ever write secrets to logs!
 
 The secret is being printed here for demonstration purposes.
@@ -80,24 +81,24 @@ Use the secret details below with the vault cli
 to get more info about the token.
 
 {
-  "request_id": "e7326c2a-c9be-bdfc-aa10-17f7cd56d296",
+  "request_id": "7c850f7e-bcad-ba8b-882f-927f868ec928",
   "lease_id": "",
   "lease_duration": 0,
   "renewable": false,
   "data": null,
   "warnings": null,
   "auth": {
-    "client_token": "b81ffe89-264c-8538-f6f7-fd7e4d67cb17",
-    "accessor": "abacdce0-c2db-d0c3-7e0c-b43208f45157",
+    "client_token": "7f49f049-cabf-c1e3-906d-2817f68d403e",
+    "accessor": "169b473d-e80e-5021-fc02-6e7209aa2235",
     "policies": [
       "default"
     ],
     "metadata": {
       "host_ip": "10.240.0.7",
       "namespace": "vault-controller",
-      "pod_ip": "10.224.2.39",
-      "pod_name": "vault-example-f0cip",
-      "pod_uid": "312e3c8a-9d3c-11e6-a0f3-42010a8a00ab"
+      "pod_ip": "10.224.2.42",
+      "pod_name": "vault-example-wif7l",
+      "pod_uid": "e7a3df17-9d41-11e6-a0f3-42010a8a00ab"
     },
     "lease_duration": 86400,
     "renewable": true
@@ -105,5 +106,5 @@ to get more info about the token.
 }
 
 ==> vault-example started! Log data will stream in below:
-2016/10/28 18:27:41 Successfully renewed the client token; next renewal in 43200 seconds
+2016/10/28 19:08:35 Successfully renewed the client token; next renewal in 43200 seconds
 ```
