@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: ReplicaSet
+metadata:
+  name: vault
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vault
+    spec:
+      containers:
+        - name: vault
+          image: "vault:0.6.2"
+          args:
+            - "server"
+            - "-dev"
+            - "-log-level=debug"
+            - "-dev-root-token-id=3e4a5ba1-kube-422b-d1db-844979cab098"

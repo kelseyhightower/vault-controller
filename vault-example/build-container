@@ -1,0 +1,5 @@
+#!/bin/bash
+./build
+docker build -t kelseyhightower/vault-example:0.0.1 .
+docker push kelseyhightower/vault-example:0.0.1
+rm vault-example

@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: ReplicaSet
+metadata:
+  name: vault-controller
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vault-controller
+    spec:
+      containers:
+        - name: vault-controller
+          image: "kelseyhightower/vault-controller:0.0.1"
+          imagePullPolicy: Always
+          env:
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vault-controller
+                  key: vault_token
+            - name: VAULT_WRAP_TTL
+              # The wrapped vault token must unwrapped by the pod in
+              # this number of seconds.
+              value: "120"
+            - name: VAULT_ADDR
+              value: "http://vault:8200"
+        - name: kubectl
+          image: kelseyhightower/kubectl:1.4.0
+          args:
+            - "proxy"
