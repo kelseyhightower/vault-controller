@@ -25,14 +25,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-const (
-	tokenFile = "/var/run/secrets/vaultproject.io/secret.json"
-)
-
-var (
-	vaultAddr           string
-	vaultControllerAddr string
-)
+const tokenFile = "/var/run/secrets/vaultproject.io/secret.json"
 
 func main() {
 	log.Println("Starting vault-init...")
@@ -47,65 +40,49 @@ func main() {
 		log.Fatal("POD_NAMESPACE must be set and non-empty")
 	}
 
-	vaultAddr = os.Getenv("VAULT_ADDR")
+	vaultAddr := os.Getenv("VAULT_ADDR")
 	if vaultAddr == "" {
 		vaultAddr = "http://vault:8200"
 	}
 
-	vaultControllerAddr = os.Getenv("VAULT_CONTROLLER_ADDR")
+	vaultControllerAddr := os.Getenv("VAULT_CONTROLLER_ADDR")
 	if vaultControllerAddr == "" {
 		vaultControllerAddr = "http://vault-controller"
 	}
 
-	http.HandleFunc("/", tokenHander)
+	http.Handle("/", tokenHandler{vaultAddr})
 	go func() {
-		http.ListenAndServe(":80", nil)
+		log.Fatal(http.ListenAndServe(":80", nil))
 	}()
 
 	// Ensure the token handler is ready.
 	time.Sleep(time.Millisecond * 300)
 
 	// Remove exiting token files before requesting a new one.
-	os.Remove(tokenFile)
+	if err := os.Remove(tokenFile); err != nil {
+		log.Printf("could not remove token file at %s: %s", tokenFile, err)
+	}
 
 	// Set up a file watch on the wrapped vault token.
 	tokenWatcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("could not create watcher: %s", err)
 	}
 	err = tokenWatcher.Add(path.Dir(tokenFile))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("could not add watcher: %v", err)
 	}
 
 	done := make(chan bool)
-
-	u := fmt.Sprintf("%s/token?name=%s&namespace=%s", vaultControllerAddr, name, namespace)
 	retryDelay := 5 * time.Second
 	go func() {
 		for {
-			log.Printf("Requesting a new wrapped token from %s", vaultControllerAddr)
-			resp, err := http.Post(u, "", nil)
+			err := requestToken(vaultControllerAddr, name, namespace)
 			if err != nil {
 				log.Printf("token request: Request error %v; retrying in %v", err, retryDelay)
 				time.Sleep(retryDelay)
 				continue
 			}
-
-			if resp.StatusCode != 202 {
-				data, err := ioutil.ReadAll(resp.Body)
-				if err != nil {
-					resp.Body.Close()
-					log.Printf("token request: Request error %v; retrying in %v", err, retryDelay)
-					time.Sleep(retryDelay)
-					continue
-				}
-				resp.Body.Close()
-				log.Printf("token request: Request error %v; retrying in %v", string(data), retryDelay)
-				time.Sleep(retryDelay)
-				continue
-			}
-
 			log.Println("Token request complete; waiting for callback...")
 			select {
 			case <-time.After(time.Second * 30):
@@ -121,16 +98,32 @@ func main() {
 		}
 	}()
 
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
-	for {
-		select {
-		case <-signalChan:
-			log.Printf("Shutdown signal received, exiting...")
-			os.Exit(0)
-		case <-done:
-			log.Println("Successfully obtained and unwrapped the vault token, exiting...")
-			os.Exit(0)
-		}
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case <-quit:
+		log.Printf("Shutdown signal received, exiting...")
+	case <-done:
+		log.Println("Successfully obtained and unwrapped the vault token, exiting...")
 	}
+}
+
+func requestToken(vaultControllerAddr, name, namespace string) error {
+	u := fmt.Sprintf("%s/token?name=%s&namespace=%s", vaultControllerAddr, name, namespace)
+	log.Printf("Requesting a new wrapped token from %s", vaultControllerAddr)
+	resp, err := http.Post(u, "", nil)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 202 {
+		return nil
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	return fmt.Errorf("%s", data)
 }

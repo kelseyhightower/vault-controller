@@ -24,32 +24,63 @@ import (
 	"github.com/hashicorp/vault/api"
 )
 
-const (
-	vaultSecretFile = "/var/run/secrets/vaultproject.io/secret.json"
-)
-
-var (
-	vaultAddr string
-)
+const vaultSecretFile = "/var/run/secrets/vaultproject.io/secret.json"
 
 func main() {
 	log.Println("Starting vault-example app...")
-	vaultAddr = os.Getenv("VAULT_ADDR")
-	if vaultAddr == "" {
-		vaultAddr = "http://vault:8200"
+	addr := os.Getenv("VAULT_ADDR")
+	if addr == "" {
+		addr = "http://vault:8200"
 	}
 
 	log.Printf("Reading vault secret file from %s", vaultSecretFile)
 	data, err := ioutil.ReadFile(vaultSecretFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("could not read secret file: %v", err)
 	}
 	secret, err := api.ParseSecret(bytes.NewReader(data))
+	if err != nil {
+		log.Fatalf("could not parse secret: %v", err)
+	}
+
+	logSecret(secret)
+
+	client, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	client.SetAddress(addr)
+	client.SetToken(secret.Auth.ClientToken)
+
+	// The Pod is responsible for renewing the client token.
+	retryDelay := 5 * time.Second
+	go func() {
+		for {
+			s, err := client.Auth().Token().RenewSelf(secret.Auth.LeaseDuration)
+			if err != nil {
+				log.Printf("token renew: Renew client token error: %v; retrying in %v", err, retryDelay)
+				time.Sleep(retryDelay)
+				continue
+			}
+
+			nextRenew := s.Auth.LeaseDuration / 2
+			log.Printf("Successfully renewed the client token; next renewal in %d seconds", nextRenew)
+			time.Sleep(time.Duration(nextRenew) * time.Second)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Printf("Shutdown signal received, exiting...")
+}
+
+// logSecret logs your secret, don't ever do this!
+func logSecret(secret *api.Secret) {
 	oldLogFlags := log.Flags()
+	defer log.SetFlags(oldLogFlags)
+
 	log.SetFlags(0)
 	log.Println("==> WARNING: Don't ever write secrets to logs!")
 	log.Println("")
@@ -63,41 +94,4 @@ func main() {
 	log.Println(string(j))
 	log.Println("")
 	log.Println("==> vault-example started! Log data will stream in below:")
-	log.SetFlags(oldLogFlags)
-
-	config := api.DefaultConfig()
-	vaultClient, err := api.NewClient(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	vaultClient.SetAddress(vaultAddr)
-	vaultClient.SetToken(secret.Auth.ClientToken)
-
-	// The Pod is responsible for renewing the client token.
-	retryDelay := 5 * time.Second
-	go func() {
-		for {
-			s, err := vaultClient.Auth().Token().RenewSelf(secret.Auth.LeaseDuration)
-			if err != nil {
-				log.Printf("token renew: Renew client token error: %v; retrying in %v", err, retryDelay)
-				time.Sleep(retryDelay)
-				continue
-			}
-
-			nextRenew := s.Auth.LeaseDuration / 2
-			log.Printf("Successfully renewed the client token; next renewal in %d seconds", nextRenew)
-			time.Sleep(time.Duration(nextRenew) * time.Second)
-		}
-	}()
-
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
-	for {
-		select {
-		case <-signalChan:
-			log.Printf("Shutdown signal received, exiting...")
-			os.Exit(0)
-		}
-	}
 }

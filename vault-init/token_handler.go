@@ -21,7 +21,11 @@ import (
 	"github.com/hashicorp/vault/api"
 )
 
-func tokenHander(w http.ResponseWriter, r *http.Request) {
+type tokenHandler struct {
+	vaultAddr string
+}
+
+func (h tokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_, err := os.Stat(tokenFile)
 	if !os.IsNotExist(err) {
 		log.Println("Token file already exists")
@@ -54,7 +58,7 @@ func tokenHander(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client.SetToken(swi.Token)
-	client.SetAddress(vaultAddr)
+	client.SetAddress(h.vaultAddr)
 
 	// Vault knows to unwrap the client token if the token to unwrap is empty.
 	secret, err := client.Logical().Unwrap("")

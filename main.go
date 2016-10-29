@@ -12,6 +12,8 @@
 package main
 
 import (
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -21,9 +23,7 @@ import (
 	"github.com/hashicorp/vault/api"
 )
 
-var (
-	vaultClient *api.Client
-)
+var vaultClient *api.Client
 
 func main() {
 	log.Println("Starting vault-controller app...")
@@ -42,19 +42,27 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.HandleFunc("/token", tokenRequestHandler)
+	http.Handle("/token", handler{tokenRequestHandler})
 	go func() {
-		http.ListenAndServe(":80", nil)
+		log.Fatal(http.ListenAndServe(":80", nil))
 	}()
 
 	log.Println("Listening for token requests.")
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
-	for {
-		select {
-		case <-signalChan:
-			log.Printf("Shutdown signal received, exiting...")
-			os.Exit(0)
-		}
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Printf("Shutdown signal received, exiting...")
+}
+
+type handler struct {
+	f func(io.Writer, *http.Request) (int, error)
+}
+
+func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	code, err := h.f(w, r)
+	w.WriteHeader(code)
+	if err != nil {
+		log.Printf("%v", err)
+		fmt.Fprintf(w, "%v", err)
 	}
 }
