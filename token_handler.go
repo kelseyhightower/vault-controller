@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,14 +24,11 @@ import (
 	"github.com/hashicorp/vault/api"
 )
 
-func tokenRequestHandler(w http.ResponseWriter, r *http.Request) {
+func tokenRequestHandler(w io.Writer, r *http.Request) (int, error) {
 	log.Printf("token request from %s", r.RemoteAddr)
 	name := r.FormValue("name")
 	if name == "" {
-		log.Printf("token request: empty name from %s\n", r.RemoteAddr)
-		w.WriteHeader(400)
-		io.WriteString(w, "missing or empty name parameter.")
-		return
+		return 400, fmt.Errorf("missing or empty name parameter from %s", r.RemoteAddr)
 	}
 
 	namespace := r.FormValue("namespace")
@@ -44,41 +41,26 @@ func tokenRequestHandler(w http.ResponseWriter, r *http.Request) {
 	u := fmt.Sprintf("http://127.0.0.1:8001/api/v1/namespaces/%s/pods/%s", namespace, name)
 	resp, err := http.Get(u)
 	if err != nil {
-		log.Printf("token request: error during pod (%s) lookup: %s", name, err)
-		w.WriteHeader(500)
-		io.WriteString(w, fmt.Sprintf("error during pod (%s) lookup", name))
-		return
+		return 500, fmt.Errorf("error during pod (%s) lookup %s", name, err)
 	}
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("token request: error parsing pod (%s) details: %s", name, err)
-		w.WriteHeader(500)
-		io.WriteString(w, fmt.Sprintf("error during pod (%s) lookup", name))
-		return
+		return 500, fmt.Errorf("error parsing pod (%s) details: %s", name, err)
 	}
 
 	var pod Pod
 	err = json.Unmarshal(data, &pod)
 	if err != nil {
-		log.Printf("token request: error parsing pod (%s) details: %s", name, err)
-		w.WriteHeader(500)
-		io.WriteString(w, fmt.Sprintf("error during pod (%s) lookup", name))
-		return
+		return 500, fmt.Errorf("error parsing pod (%s) details: %s", name, err)
 	}
 
 	if pod.Status.PodIP == "" {
-		log.Printf("token request: error missing or empty pod (%s) IP", name)
-		w.WriteHeader(412)
-		io.WriteString(w, "error missing or empty pod IP")
-		return
+		return 412, fmt.Errorf("error missing or empty pod IP (%s)", name)
 	}
 
 	policies := pod.Metadata.Annotations["vaultproject.io/policies"]
 	if policies == "" {
-		log.Printf("token request: error missing or empty pod (%s) vaultproject.io/role annotation", name)
-		w.WriteHeader(412)
-		io.WriteString(w, "error missing or empty vaultproject.io/role annotation")
-		return
+		return 500, fmt.Errorf("error missing or empty pod vaultproject.io/role annotation (%s)", name)
 	}
 	ttl := pod.Metadata.Annotations["vaultproject.io/ttl"]
 	if ttl == "" {
@@ -101,37 +83,29 @@ func tokenRequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	secret, err := vaultClient.Auth().Token().Create(tcr)
 	if err != nil {
-		log.Printf("token request: error creating wrapped token for pod (%s)", name)
-		w.WriteHeader(500)
-		io.WriteString(w, "error creating wrapped token")
-		return
+		return 500, fmt.Errorf("error creating wrapped token for pod (%s)", name)
 	}
 
 	var wrappedToken bytes.Buffer
 	err = json.NewEncoder(&wrappedToken).Encode(&secret.WrapInfo)
 	if err != nil {
-		log.Printf("token request: error parsing wrapped token for pod (%s)", name)
-		w.WriteHeader(500)
-		io.WriteString(w, "error creating wrapped token")
+		return 500, fmt.Errorf("error parsing wrapped token for pod (%s)", name)
+	}
+	go pushWrappedTokenTo(pod.Status.PodIP, &wrappedToken)
+
+	return 202, nil
+}
+
+func pushWrappedTokenTo(ip string, token io.Reader) {
+	url := fmt.Sprintf("http://%s", ip)
+	resp, err := http.Post(url, "", token)
+	if err != nil {
+		log.Printf("error pushing wrapped token to %s: %s", url, err)
 		return
 	}
-
-	// Push the wrapped token to the pod using the pod IP.
-	go func() {
-		podURL := fmt.Sprintf("http://%s", pod.Status.PodIP)
-		resp, err := http.Post(podURL, "", &wrappedToken)
-		if err != nil {
-			log.Printf("error pushing wrapped token to %s: %s", podURL, err)
-			return
-		}
-		if resp.StatusCode != 200 {
-			log.Printf("error pushing wrapped token to %s: %s", podURL, resp.Status)
-			return
-		}
-		log.Printf("successfully pushed wrapped token to %s", podURL)
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("error pushing wrapped token to %s: %s", url, resp.Status)
 		return
-	}()
-
-	w.WriteHeader(202)
-	return
+	}
+	log.Printf("successfully pushed wrapped token to %s", url)
 }
