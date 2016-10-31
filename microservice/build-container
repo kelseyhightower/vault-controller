@@ -1,0 +1,5 @@
+#!/bin/bash
+./build
+docker build -t kelseyhightower/microservice:0.0.1 .
+docker push kelseyhightower/microservice:0.0.1
+rm microservice

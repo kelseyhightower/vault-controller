@@ -1,0 +1,78 @@
+apiVersion: extensions/v1beta1
+kind: ReplicaSet
+metadata:
+  name: client
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: client
+      annotations:
+        vaultproject.io/policies: "default,microservice"
+        vaultproject.io/ttl: "24h"
+        pod.alpha.kubernetes.io/init-containers: '[
+          {
+            "name": "vault-init",
+            "image": "kelseyhightower/vault-init:0.0.1",
+            "imagePullPolicy": "Always",
+            "env": [
+              {
+                "name": "POD_NAME",
+                "valueFrom": {"fieldRef": {"fieldPath": "metadata.name"}}
+              },
+              { 
+                "name": "POD_NAMESPACE",
+                "valueFrom": {"fieldRef": {"fieldPath": "metadata.namespace"}}
+              },
+              { 
+                "name": "VAULT_ADDR",
+                "value": "http://vault:8200"
+              },
+              { 
+                "name": "VAULT_CONTROLLER_ADDR",
+                "value": "http://vault-controller"
+              }
+            ],
+            "volumeMounts": [
+              {
+                "name": "vault-token",
+                "mountPath": "/var/run/secrets/vaultproject.io"
+              }
+            ]
+          }
+        ]'
+    spec:
+      containers:
+        - name: client
+          image: "kelseyhightower/microservice:0.0.1"
+          imagePullPolicy: Always
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP 
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace 
+          args:
+            - "-addr=0.0.0.0:443"
+            - "-client-pki-path=/pki/issue/client"
+            - "-client-pki-ttl=60s"
+            - "-cluster-domain=cluster.local"
+            - "-ip=$(POD_IP)"
+            - "-name=$(POD_NAME)"
+            - "-namespace=$(POD_NAMESPACE)"
+            - "-remote-addr=https://server"
+            - "-vault-addr=http://vault:8200"
+          volumeMounts:
+            - name: vault-token
+              mountPath: "/var/run/secrets/vaultproject.io"
+      volumes:
+        - name: vault-token
+          emptyDir: {}
