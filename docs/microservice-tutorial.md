@@ -1,8 +1,10 @@
-# Microservice Tutorial
+# Use Case: Short-lived TLS Certs, TLS Mutual Auth, and Microservices
 
 This tutorial will walk you through deploying a set of microservices that utilize short lived TLS certificates for secure communication between each service and their clients. 
 
 ## Prerequisites
+
+Be sure to complete the [Deployment Guide](deployment-guide.md) tutorial first.
 
 This tutorial will require remote access to the Vault server running in your cluster. Set up a proxy from your local machine to the Vault server:
 

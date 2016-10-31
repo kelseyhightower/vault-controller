@@ -37,6 +37,7 @@ Before you can complete the tutorials you'll need access to a Kubernetes cluster
 
 * [Deployment Guide](docs/deployment-guide.md)
 * [Example Usage](docs/example-usage.md)
+* [Use Case: Short-lived TLS Certs, TLS Mutual Auth, and Microservices](docs/microservice-tutorial.md)
 
 ## Cleanup
 
