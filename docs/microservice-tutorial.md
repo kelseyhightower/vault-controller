@@ -117,7 +117,7 @@ vault write pki/roles/server \
   server_flag="true"
 ```
 
-The `allow_any_name` and `enforce_hostnames` flags are being set here to enable the ability to generate server certificates that contain Kubernetes service names in the DNS Subject Alternative Names filed of the issued certificate. This means clients can lookup the service using a DNS short name such as `foo`, which maps to `foo.default.svc.cluster.local`, and still be able to validate the server side certificate. 
+The `allow_any_name` and `enforce_hostnames` flags are being set here to enable the ability to generate server certificates that contain Kubernetes service names in the DNS Subject Alternative Names field of the issued certificate. This means clients can lookup the service using a DNS short name such as `foo`, which maps to `foo.default.svc.cluster.local`, and still be able to validate the server side certificate. 
 
 ## Create a Vault Policy
 
