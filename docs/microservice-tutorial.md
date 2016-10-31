@@ -187,7 +187,7 @@ Log Output:
 2016/10/31 04:07:45 renewing cert in 29 seconds
 ```
 
-At this point the other Pods can access the `server` service using the `https://server` address, but each client will required a signed client certificate from the PKI secret backend.
+At this point the other Pods can access the `server` service using the `https://server` address, but each client will require a signed client certificate from the PKI secret backend.
 
 ## Deploy the client
 
