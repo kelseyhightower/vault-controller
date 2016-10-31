@@ -220,7 +220,7 @@ Log Output:
 2016/10/31 04:24:55 Hello from server service
 ```
 
-At this point the `client` Pod contact the `server` service every 5 minutes, and continuously renew it Vault token and client certificate in the background.
+At this point the `client` Pod contacts the `server` service every 5 minutes, and continuously renew it Vault token and client certificate in the background.
 
 ## Next Steps
 
