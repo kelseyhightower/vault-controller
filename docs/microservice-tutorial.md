@@ -199,7 +199,7 @@ Create the `client` ReplicaSet:
 kubectl -n vault-controller create -f replicasets/client.yaml
 ```
 
-Once the `client` container starts it will obtain a short-lived client certificate from the PKI path `pki/issue/client`. For demonstration purposes each TLS certificate is generated with a TTL of 60 seconds and automatically renewed by the `client` and server Pods before they expire. The certificate TTL can be adjust using the `-client-pki-ttl` flag.
+Once the `client` container starts it will obtain a short-lived client certificate from the PKI path `pki/issue/client`. For demonstration purposes each TLS certificate is generated with a TTL of 60 seconds and automatically renewed by the `client` and server Pods before they expire. The certificate TTL can be adjusted using the `-client-pki-ttl` flag.
 
 View the logs for the `client` Pod:
 
