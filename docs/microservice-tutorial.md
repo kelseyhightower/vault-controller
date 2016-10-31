@@ -1,6 +1,6 @@
 # Use Case: Short-lived TLS Certs, TLS Mutual Auth, and Microservices
 
-This tutorial will walk you through deploying a set of microservices that utilize short lived TLS certificates for secure communication between each service and their clients. 
+This tutorial will walk you through deploying a set of microservices that utilize short-lived TLS certificates for secure communication between microservice and their clients. 
 
 ## Prerequisites
 
