@@ -1,6 +1,6 @@
 # Vault Controller
 
-The Vault Controller automates the creation of Vault tokens for Kubernetes Pods.
+The Vault Controller automates the creation of Vault tokens for Kubernetes Pods. This repo includes a set of [hands-on tutorials](#usage) and example programs you can use to try out the Vault Controller.
 
 ## Status
 
