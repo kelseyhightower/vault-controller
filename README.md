@@ -15,7 +15,7 @@ This is a prototype. Do not use this in production.
 
 ### How it Works
 
-![Vault Controller Flow](https://github.com/kelseyhightower/images/vault-controller-flow.png)
+![Vault Controller Flow](images/vault-controller-flow.png)
 
 1. An Init container requests a wrapped token from the Vault Controller
 2. The Vault Controller retrieves the Pod details from the Kubernetes API server
