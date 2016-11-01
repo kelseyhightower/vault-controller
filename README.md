@@ -15,6 +15,8 @@ This is a prototype. Do not use this in production.
 
 ### How it Works
 
+The following diagram demonstrates the flow Pods use to obtain a dedicated token when running in a Kubernetes cluster.
+
 ![Vault Controller Flow](images/vault-controller-flow.png)
 
 1. An Init container requests a wrapped token from the Vault Controller
