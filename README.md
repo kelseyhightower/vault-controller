@@ -13,7 +13,20 @@ This is a prototype. Do not use this in production.
 
 ## Documentation
 
-* [How it Works](docs/how-it-works.md)
+### How it Works
+
+![Vault Controller Flow](https://github.com/kelseyhightower/images/vault-controller-flow.png)
+
+1. An Init container requests a wrapped token from the Vault Controller
+2. The Vault Controller retrieves the Pod details from the Kubernetes API server
+3. If the Pod exists and contains the `vaultproject.io/policies` annotation a unique wrapped token is generated for the Pod.
+4. The Vault Controller "callsback" the Pod using the Pod IP obtained from the Kubernetes API.
+5. The Init container unwraps the token to obtain a dedicated Vault token.
+6. The dedicated token is written to a well-known location and the Init container exits.
+7. Another container in the Pod reads the token from the token file.
+8. Another container in the Pod renews the token to keep it from expiring.
+
+More details can be found in the [How it Works](docs/how-it-works.md) document.
 
 ## Usage
 
