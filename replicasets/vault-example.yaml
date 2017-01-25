@@ -19,17 +19,17 @@ spec:
             "env": [
               {
                 "name": "POD_NAME",
-                "valueFrom": {"fieldRef": {"fieldPath": "metadata.name"}}
+                "valueFrom": {"fieldRef": {"fieldPath": "metadata.name", "apiVersion": "v1"}}
               },
-              { 
+              {
                 "name": "POD_NAMESPACE",
-                "valueFrom": {"fieldRef": {"fieldPath": "metadata.namespace"}}
+                "valueFrom": {"fieldRef": {"fieldPath": "metadata.namespace", "apiVersion": "v1"}}
               },
-              { 
+              {
                 "name": "VAULT_ADDR",
                 "value": "http://vault:8200"
               },
-              { 
+              {
                 "name": "VAULT_CONTROLLER_ADDR",
                 "value": "http://vault-controller"
               }
