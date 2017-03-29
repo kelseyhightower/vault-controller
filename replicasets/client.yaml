@@ -19,11 +19,11 @@ spec:
             "env": [
               {
                 "name": "POD_NAME",
-                "valueFrom": {"fieldRef": {"fieldPath": "metadata.name"}}
+                "valueFrom": {"fieldRef": {"apiVersion": "v1", "fieldPath": "metadata.name"}}
               },
               { 
                 "name": "POD_NAMESPACE",
-                "valueFrom": {"fieldRef": {"fieldPath": "metadata.namespace"}}
+                "valueFrom": {"fieldRef": {"apiVersion": "v1", "fieldPath": "metadata.namespace"}}
               },
               { 
                 "name": "VAULT_ADDR",
