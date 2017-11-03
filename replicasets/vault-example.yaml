@@ -11,37 +11,6 @@ spec:
       annotations:
         vaultproject.io/policies: default
         vaultproject.io/ttl: "24h"
-        pod.alpha.kubernetes.io/init-containers: '[
-          {
-            "name": "vault-init",
-            "image": "kelseyhightower/vault-init:0.0.1",
-            "imagePullPolicy": "Always",
-            "env": [
-              {
-                "name": "POD_NAME",
-                "valueFrom": {"fieldRef": {"fieldPath": "metadata.name"}}
-              },
-              { 
-                "name": "POD_NAMESPACE",
-                "valueFrom": {"fieldRef": {"fieldPath": "metadata.namespace"}}
-              },
-              { 
-                "name": "VAULT_ADDR",
-                "value": "http://vault:8200"
-              },
-              { 
-                "name": "VAULT_CONTROLLER_ADDR",
-                "value": "http://vault-controller"
-              }
-            ],
-            "volumeMounts": [
-              {
-                "name": "vault-token",
-                "mountPath": "/var/run/secrets/vaultproject.io"
-              }
-            ]
-          }
-        ]'
     spec:
       containers:
         - name: vault-example
@@ -53,6 +22,26 @@ spec:
           volumeMounts:
             - name: vault-token
               mountPath: "/var/run/secrets/vaultproject.io"
+      initContainers:
+        - name: vault-init
+          image: kelseyhightower/vault-init:0.0.1
+          imagePullPolicy: Always
+          env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: VAULT_ADDR
+            value: http://vault:8200
+          - name: VAULT_CONTROLLER_ADDR
+            value: http://vault-controller
+          volumeMounts:
+          - name: vault-token
+            mountPath: "/var/run/secrets/vaultproject.io"
       volumes:
         - name: vault-token
           emptyDir: {}
