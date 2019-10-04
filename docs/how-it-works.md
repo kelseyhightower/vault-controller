@@ -3,7 +3,7 @@
 
 ## Requesting a Wrapped Token
 
-The Vault Controller creates [wrapped tokens](https://www.hashicorp.com/blog/vault-0.6.html#response-wrapping) for each Pod based
+The Vault Controller creates [wrapped tokens](https://www.vaultproject.io/docs/concepts/response-wrapping.html) for each Pod based
 on a simple callback flow. Pods request a wrapped token via an HTTP request to a Vault Controller running in the Kubernetes cluster:
 
 ```
